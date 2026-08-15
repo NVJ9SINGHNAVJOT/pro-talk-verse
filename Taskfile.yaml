@@ -79,8 +79,8 @@ tasks:
   k-cluster:
     desc: Display detailed information about the Kafka broker cluster, including status and replication.
     cmds:
-      - cd backend/kafka && docker exec talkverse-kafka-0 kafka-metadata-quorum.sh --bootstrap-server talkverse-kafka-0:9092 describe --status
-      - cd backend/kafka && docker exec talkverse-kafka-0 kafka-metadata-quorum.sh --bootstrap-server talkverse-kafka-0:9092 describe --replication
+      - cd backend/kafka && docker exec talkverse-kafka-0 /opt/kafka/bin/kafka-metadata-quorum.sh --bootstrap-server talkverse-kafka-0:9092 describe --status
+      - cd backend/kafka && docker exec talkverse-kafka-0 /opt/kafka/bin/kafka-metadata-quorum.sh --bootstrap-server talkverse-kafka-0:9092 describe --replication
 
   kafka-topics:
     desc: Create Kafka topics for the production cluster (you can modify partition settings in the kafka_config.sh file).
