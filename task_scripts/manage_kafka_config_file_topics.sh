@@ -78,8 +78,9 @@ validate_topic_config() {
         exit 1
     fi
 
-    for topic in "${!topics_and_partitions[@]}"; do
-        partitions="${topics_and_partitions[$topic]}"
+    for entry in "${topics_and_partitions[@]}"; do
+        topic="${entry%%:*}"
+        partitions="${entry##*:}"
 
         # Check if topic or partition value is missing
         if [ -z "$topic" ] || [ -z "$partitions" ]; then
@@ -105,22 +106,25 @@ validate_topic_config
 case "$ACTION" in
     "create")
         # Loop through the topics and create them
-        for topic in "${!topics_and_partitions[@]}"; do
-            partitions="${topics_and_partitions[$topic]}"
+        for entry in "${topics_and_partitions[@]}"; do
+            topic="${entry%%:*}"
+            partitions="${entry##*:}"
             create_topic_if_not_exists "$KAFKA_CONTAINER" "$topic" "$partitions" "$REPLICATION_FACTOR"
         done
         logsuccess "All topics created successfully."
         ;;
     "increase")
         # Loop through the topics and increase partitions
-        for topic in "${!topics_and_partitions[@]}"; do
+        for entry in "${topics_and_partitions[@]}"; do
+            topic="${entry%%:*}"
             increase_partitions "$KAFKA_CONTAINER" "$topic" "$NEW_PARTITIONS"
         done
         logsuccess "Partitions increased successfully for all topics."
         ;;
     "delete")
         # Loop through the topics and delete them
-        for topic in "${!topics_and_partitions[@]}"; do
+        for entry in "${topics_and_partitions[@]}"; do
+            topic="${entry%%:*}"
             delete_topic_if_exists "$KAFKA_CONTAINER" "$topic"
         done
         logsuccess "All topics deleted successfully."

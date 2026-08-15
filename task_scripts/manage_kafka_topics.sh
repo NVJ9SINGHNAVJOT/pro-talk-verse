@@ -18,7 +18,7 @@ wait_for_kafka_ready() {
     fi
 
     while [ "$elapsed" -lt "$TIMEOUT" ]; do
-        if docker exec "$container_name" kafka-topics.sh --bootstrap-server "$BROKER" --list >/dev/null 2>&1; then
+        if docker exec "$container_name" /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --list >/dev/null 2>&1; then
             loginf "Kafka is ready. Proceeding to actions..."
             return 0
         else
@@ -42,7 +42,7 @@ topic_exists() {
         exit 1
     fi
 
-    if docker exec "$container_name" kafka-topics.sh --bootstrap-server "$BROKER" --list | grep -qw "$topic_name"; then
+    if docker exec "$container_name" /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --list | grep -qw "$topic_name"; then
         return 0
     else
         return 1
@@ -61,7 +61,7 @@ delete_topic_if_exists() {
 
     if topic_exists "$container_name" "$topic_name"; then
         loginf "Deleting topic: $topic_name"
-        if docker exec "$container_name" kafka-topics.sh --bootstrap-server "$BROKER" --delete --topic "$topic_name"; then
+        if docker exec "$container_name" /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --delete --topic "$topic_name"; then
             loginf "Topic '$topic_name' deleted."
         else
             logerr "Failed to delete topic '$topic_name'."
@@ -87,7 +87,7 @@ create_topic_if_not_exists() {
 
     if ! topic_exists "$container_name" "$topic_name"; then
         loginf "Creating topic: $topic_name"
-        if docker exec "$container_name" kafka-topics.sh --bootstrap-server "$BROKER" --create \
+        if docker exec "$container_name" /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --create \
             --topic "$topic_name" --partitions "$partitions" --replication-factor "$replication_factor"; then
             loginf "Topic '$topic_name' created with $partitions partitions and replication factor of $replication_factor."
         else
@@ -116,11 +116,11 @@ increase_partitions() {
     fi
 
     local current_partitions
-    current_partitions=$(docker exec "$container_name" kafka-topics.sh --bootstrap-server "$BROKER" --describe --topic "$topic_name" | grep "Partitions:" | awk '{print $2}')
+    current_partitions=$(docker exec "$container_name" /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --describe --topic "$topic_name" | grep "Partitions:" | awk '{print $2}')
 
     if [ "$current_partitions" -lt "$new_partitions" ]; then
         loginf "Increasing partitions for topic '$topic_name' from $current_partitions to $new_partitions."
-        if docker exec "$container_name" kafka-topics.sh --bootstrap-server "$BROKER" --alter \
+        if docker exec "$container_name" /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --alter \
             --topic "$topic_name" --partitions "$new_partitions"; then
             loginf "Successfully increased partitions for topic '$topic_name'."
         else
